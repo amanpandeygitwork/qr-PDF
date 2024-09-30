@@ -16,13 +16,26 @@ app.get("/qrcode", async (req, res) => {
     res.setHeader("Content-Disposition", "attachment; filename=qrcodes.pdf");
     doc.pipe(res);
 
-    let posY = 10;
+    let posY = 0;
+    let posX = 0;
+    let noOfQRs = 0;
     for (let i = 0; i < urls.length; i++) {
+      if (posX == 600) {
+        posY += 100;
+        posX = 0;
+      }
+      if (noOfQRs == 48) {
+        noOfQRs = 0;
+        doc.addPage();
+        posX = 0;
+        posY = 0;
+      }
       const qrCodeImage = await qrcode.toDataURL(urls[i], {
         width: 100,
       });
-      doc.image(qrCodeImage, 10, posY);
-      posY += 100;
+      noOfQRs++;
+      doc.image(qrCodeImage, posX, posY);
+      posX += 100;
     }
 
     doc.end();
